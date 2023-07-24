@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Painel Administrativo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+    .admin-container {
+      margin-top: 50px;
+      padding: 20px;
+      background-color: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    input {
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 600px;
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+    td {
+      text-align: center;
+    }
+    button {
+      padding: 8px 12px;
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .mensagem {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    h1 {
+      color: #3498db;
+      margin-bottom: 30px;
+    }
+    h2 {
+      color: #2980b9;
+      margin-bottom: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .logo {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background-color: #3498db;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      color: #fff;
+    }
+    .logo-text {
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <div class="IA">
+      <span class="-text"></span>
+    </div>
+    <h1>Painel Administrativo</h1>
+
+    <h2>Logins Salvos</h2>
+    <table id="tabelaLogins">
+      <tr>
+        <th>Usuário</th>
+        <th>Senha</th>
+        <th>Expiração</th>
+        <th>Ações</th>
+      </tr>
+    </table>
+
+    <h2>Adicionar Novo Login</h2>
+    <form onsubmit="return adicionarLogin()">
+      <input type="text" id="novoUsername" placeholder="Novo Usuário" required>
+      <input type="password" id="novoPassword" placeholder="Nova Senha" required>
+      <input type="date" id="dataExpiracao" required>
+      <input type="submit" value="Adicionar">
+    </form>
+    <p id="mensagemSucesso" class="mensagem" style="color: green;"></p>
+    <p id="mensagemErro" class="mensagem" style="color: red;"></p>
+  </div>
+
+  <script>
+    // Função para adicionar um novo login
+    function adicionarLogin() {
+      var novoUsername = document.getElementById('novoUsername').value;
+      var novoPassword = document.getElementById('novoPassword').value;
+      var dataExpiracao = document.getElementById('dataExpiracao').value; // Obtenha a data de expiração do campo de data
+
+      // Aqui você pode adicionar a lógica para salvar o novo login em um servidor back-end
+      // Neste exemplo, estamos salvando no LocalStorage apenas para fins ilustrativos
+      var loginsSalvos = JSON.parse(localStorage.getItem('logins')) || [];
+      loginsSalvos.push({ username: novoUsername, password: novoPassword, expiration: dataExpiracao });
+      localStorage.setItem('logins', JSON.stringify(loginsSalvos));
+
+      // Exibir mensagem de sucesso
+      document.getElementById('mensagemSucesso').innerText = 'Novo login adicionado com sucesso!';
+      document.getElementById('novoUsername').value = '';
+      document.getElementById('novoPassword').value = '';
+      document.getElementById('dataExpiracao').value = ''; // Limpe o campo de data após adicionar o login
+
+      // Atualizar a tabela de logins
+      atualizarTabelaLogins();
+
+      return false; // Cancelar o envio do formulário para evitar recarregar a página
+    }
+
+    // Função para verificar se um login está expirado
+    function isLoginExpired(expirationDate) {
+      var today = new Date();
+      return today > new Date(expirationDate);
+    }
+
+    // Função para exibir os logins salvos na tabela
+    function atualizarTabelaLogins() {
+      var loginsSalvos = JSON.parse(localStorage.getItem('logins')) || [];
+      var tabela = document.getElementById('tabelaLogins');
+      tabela.innerHTML = '<tr><th>Usuário</th><th>Senha</th><th>Expiração</th><th>Ações</th></tr>'; // Limpar a tabela
+      for (var i = 0; i < loginsSalvos.length; i++) {
+        var newRow = tabela.insertRow(tabela.rows.length);
+        var cell1 = newRow.insertCell(0);
+        var cell2 = newRow.insertCell(1);
+        var cell3 = newRow.insertCell(2);
+        var cell4 = newRow.insertCell(3);
+        cell1.innerHTML = loginsSalvos[i].username;
+        cell2.innerHTML = loginsSalvos[i].password;
+        cell3.innerHTML = loginsSalvos[i].expiration; // Exibindo a data de expiração conforme fornecida
+        cell4.innerHTML = '<button onclick="excluirLogin(' + i + ')">Excluir</button>';
+      }
+    }
+
+    // Função para excluir um login
+    function excluirLogin(index) {
+      var loginsSalvos = JSON.parse(localStorage.getItem('logins')) || [];
+      if (index >= 0 && index < loginsSalvos.length) {
+        loginsSalvos.splice(index, 1);
+        localStorage.setItem('logins', JSON.stringify(loginsSalvos));
+        // Atualizar a tabela após a exclusão
+        atualizarTabelaLogins();
+      }
+    }
+
+    // Chamar a função para exibir os logins salvos na tabela
+    atualizarTabelaLogins();
+  </script>
+</body>
+</html>
